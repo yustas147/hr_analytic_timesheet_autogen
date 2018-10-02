@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record id="hr_view_employee_form_inh" model="ir.ui.view">
+            <field name="name">HR employee View inherited</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='work_phone']" position="after">
+                    <button name="ts_autogen" string='Autogenerate Timesheet Activities'/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>
