@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 from openerp import api, fields, tools, models, _
-import openerp.addons.decimal_precision as dp
-from datetime import datetime
-import math
 import logging
 
 
@@ -11,41 +8,64 @@ _logger = logging.getLogger(__name__)
 class hr_employee(models.Model):
     _inherit = 'hr.employee'
 
-    do_not_round = fields.Boolean("Do not round")
+    analytic_account_id = fields.Many2one("account.analytic.account", string="Fallback Analytic Account ")
     
-    rounding_method = fields.Selection([('up', "UP"),
-                                        ('down', "Down"),
-                                        ('round', "5/4")],
-                                       string="Rounding Method",
-                                       default='round')
+    @api.multi
+    def get_dates_to_fill(self):
+        res = []
+        for inst in self:
+            att_dates = set([])
+            aal_dates = set([])
+            
+            attendancies = self.env['hr.attendance'].search([('employee_id','=',inst.id), ('worked_hours','>',0), ('sheet_id', '!=', None)])
+            for att in attendancies:
+                dt = att.name.split()[0]
+                att_dates.add(dt)
+                
+            account_analytic_lines = self.env['account.analytic.line'].search([('user_id','=',inst.user_id.id)])
+            for aal in account_analytic_lines:
+                aal_dates.add(aal.date)
+                    
+            # calc set difference to find dates to create timesheet activities for        
+            res = att_dates - aal_dates
+                
+        return sorted(res, reverse=True)
     
-    rounding = fields.Integer(string='Rounding', default=2)
-    
-    hr_payslip_line = fields.One2many('hr.payslip.line',
-                                      'name',
-                                      copy=True)
-    compute_per_day = fields.Boolean('Compute Per Day')
+    @api.multi
+    def get_fallback_analytic_account(self):
+        ''' Here is the logic for fallback aacc designation '''
+        
+        res_model, res_id = self.env['ir.model.data'].get_object_reference('analytic','analytic.fallback')
+        res = self.env['account.analytic.account'].browse(res_id)
+        return res 
     
     @api.multi
     def ts_autogen(self):
-        #########################
+        ''' 
+            Automatically create timesheet activity hr.analytic.timesheet with 0 time for every day with attendance without 
+            existing timesheet activity in that day.
+            Activity is created using fallback analytic account for this purpose (which is created by this module's data) or using 
+            predefined analytic account specified on the employee's field analytic_account_id
+        '''
+        
+        hr_ats_env = self.env['hr.analytic.timesheet'] 
+        
         for inst in self:
-                if inst.do_not_round:
-                    return total_val
+            if inst.analytic_account_id:
+                pass
+            else:
+                ''' use fallback analytic account '''
+                inst.analytic_account_id = inst.get_fallback_analytic_account(self)
+            dates_to_fill = inst.get_dates_to_fill()
                 
-                res = total_val
-                r_m = inst.rounding_method
-                r = inst.rounding
-    
-                if r_m == 'up':
-                    res = math.ceil(10.0**r*tot_val)
-                    res = res / 10.0 ** r
-    
-                if r_m== 'down':
-                    res = math.floor(10.0 ** r * res)
-                    res = res / 10.0 ** r
-    
-                if r_m == 'round':
-                    res = round(res, r)
-                return res    
+            for dt in dates_to_fill:
+                hr_ats_env.create({
+                                    'name': "autogen",
+                                    'journal_id': inst.journal_id.id,
+                                    'account_id': inst.analytic_account_id.id,
+                                                 'user_id': inst.user_id.id, 
+                                                 'unit_amount': 0,
+                                                 'date': dt,
+                                                 })
+            
 

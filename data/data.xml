@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="analytic.fallback" model="account.analytic.account">
+            <field name='name'>Fallback analytic account</field>
+            <field name='type'>normal</field>
+            <field name='use_timesheets'>True</field>
+        </record>
+        
+    </data>    
+</openerp>
