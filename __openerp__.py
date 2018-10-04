@@ -7,7 +7,8 @@
     'depends' : ['hr_attendance', 'hr_timesheet_sheet', 'fortnet'],
     'data' : [
         'data/data.xml',
-        'views/hr_view_employee_form_inh.xml'
+        'views/hr_view_employee_form_inh.xml',
+        'views/fortnet_view_inh.xml'
         ],
     'application': True,
     'installable': True,

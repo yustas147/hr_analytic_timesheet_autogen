@@ -49,6 +49,7 @@ class hr_employee(models.Model):
             predefined analytic account specified on the employee's field analytic_account_id
         '''
         
+        res = 0
         hr_ats_env = self.env['hr.analytic.timesheet'] 
         
         for inst in self:
@@ -68,5 +69,7 @@ class hr_employee(models.Model):
                                                  'unit_amount': 0,
                                                  'date': dt,
                                                  })
+                res += 1
+            return res
             
 

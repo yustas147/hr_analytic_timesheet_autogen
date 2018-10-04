@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record id="fortnet_backend_form_view_inh" model="ir.ui.view">
+            <field name="name">fortnet backend form view inherited</field>
+            <field name="model">fortnet.backend</field>
+            <field name="inherit_id" ref="fortnet.fortnet_backend_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='get_events_srv_act']" position="after">
+                    <button name="ts_autogen" type="object" string='Autogenerate Timesheet Activities'/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>
