@@ -4,7 +4,7 @@
     'website': 'qarea.com',
     'author' : "Y.Stasovsky, O.Drozdyuk",
     'category' : 'Accounting',
-    'depends' : ['hr_attendance', 'hr_timesheet_sheet'],
+    'depends' : ['hr_attendance', 'hr_timesheet_sheet', 'fortnet'],
     'data' : [
         'data/data.xml',
         'views/hr_view_employee_form_inh.xml'

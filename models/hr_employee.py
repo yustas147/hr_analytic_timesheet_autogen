@@ -17,7 +17,8 @@ class hr_employee(models.Model):
             att_dates = set([])
             aal_dates = set([])
             
-            attendancies = self.env['hr.attendance'].search([('employee_id','=',inst.id), ('worked_hours','>',0), ('sheet_id', '!=', None)])
+            attendancies = self.env['hr.attendance'].search([('employee_id','=',inst.id), ('sheet_id', '!=', None)])
+#            attendancies = self.env['hr.attendance'].search([('employee_id','=',inst.id), ('worked_hours','!=',0), ('sheet_id', '!=', None)])
             for att in attendancies:
                 dt = att.name.split()[0]
                 att_dates.add(dt)
@@ -35,7 +36,7 @@ class hr_employee(models.Model):
     def get_fallback_analytic_account(self):
         ''' Here is the logic for fallback aacc designation '''
         
-        res_model, res_id = self.env['ir.model.data'].get_object_reference('analytic','analytic.fallback')
+        res_model, res_id = self.env['ir.model.data'].get_object_reference('analytic','fallback')
         res = self.env['account.analytic.account'].browse(res_id)
         return res 
     
@@ -55,7 +56,7 @@ class hr_employee(models.Model):
                 pass
             else:
                 ''' use fallback analytic account '''
-                inst.analytic_account_id = inst.get_fallback_analytic_account(self)
+                inst.analytic_account_id = inst.get_fallback_analytic_account()
             dates_to_fill = inst.get_dates_to_fill()
                 
             for dt in dates_to_fill:
